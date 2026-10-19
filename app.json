@@ -1,0 +1,61 @@
+{
+  "expo": {
+    "name": "Studify",
+    "slug": "studify",
+    "version": "1.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.otavio.studify",
+      "adaptiveIcon": {
+        "backgroundColor": "#1F3A93",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "versionCode": 2
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-sqlite",
+      "@react-native-community/datetimepicker",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#1F3A93"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "O Studify precisa acessar suas fotos para anexá-las às tarefas.",
+          "cameraPermission": "O Studify precisa da câmera para fotografar anotações e anexar às tarefas.",
+          "microphonePermission": false
+        }
+      ],
+      "expo-sharing",
+      "./plugins/task-widget",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 220,
+          "backgroundColor": "#1F3A93",
+          "dark": {
+            "image": "./assets/splash-icon-dark.png",
+            "backgroundColor": "#16181D"
+          }
+        }
+      ],
+      "@react-native-vector-icons/lucide",
+      "expo-font"
+    ]
+  }
+}

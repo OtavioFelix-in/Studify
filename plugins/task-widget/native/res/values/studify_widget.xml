@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="studify_widget_description">Suas próximas provas e tarefas</string>
+    <color name="studify_widget_bg">#FFFBF9F4</color>
+    <color name="studify_widget_text">#FF22201C</color>
+    <color name="studify_widget_muted">#FF7A746A</color>
+    <color name="studify_widget_accent">#FF1F3A93</color>
+    <color name="studify_widget_ink">#FF22201C</color>
+</resources>

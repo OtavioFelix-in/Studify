@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/studify_widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/studify_widget_bg"
+    android:orientation="vertical"
+    android:padding="12dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:layout_marginEnd="6dp"
+            android:contentDescription="Studify"
+            android:src="@drawable/studify_widget_logo" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:fontFamily="@font/bricolage_extrabold"
+            android:text="studify"
+            android:textColor="@color/studify_widget_accent"
+            android:textSize="16sp" />
+
+        <ImageView
+            android:id="@+id/studify_refresh"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:padding="2dp"
+            android:contentDescription="Atualizar"
+            android:src="@drawable/studify_widget_refresh" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/studify_summary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="6dp"
+        android:maxLines="1"
+        android:textColor="@color/studify_widget_muted"
+        android:fontFamily="@font/bricolage_regular"
+        android:textSize="12sp" />
+
+    <LinearLayout
+        android:id="@+id/studify_row1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:orientation="vertical">
+        <TextView
+            android:id="@+id/studify_title1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="@color/studify_widget_text"
+            android:fontFamily="@font/bricolage_semibold"
+            android:textSize="14sp" />
+        <TextView
+            android:id="@+id/studify_sub1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="@color/studify_widget_muted"
+            android:fontFamily="@font/bricolage_regular"
+            android:textSize="12sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/studify_row2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:orientation="vertical">
+        <TextView
+            android:id="@+id/studify_title2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="@color/studify_widget_text"
+            android:fontFamily="@font/bricolage_semibold"
+            android:textSize="14sp" />
+        <TextView
+            android:id="@+id/studify_sub2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="@color/studify_widget_muted"
+            android:fontFamily="@font/bricolage_regular"
+            android:textSize="12sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/studify_row3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:orientation="vertical">
+        <TextView
+            android:id="@+id/studify_title3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="@color/studify_widget_text"
+            android:fontFamily="@font/bricolage_semibold"
+            android:textSize="14sp" />
+        <TextView
+            android:id="@+id/studify_sub3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="@color/studify_widget_muted"
+            android:fontFamily="@font/bricolage_regular"
+            android:textSize="12sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/studify_row4"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:orientation="vertical">
+        <TextView
+            android:id="@+id/studify_title4"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="@color/studify_widget_text"
+            android:fontFamily="@font/bricolage_semibold"
+            android:textSize="14sp" />
+        <TextView
+            android:id="@+id/studify_sub4"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="@color/studify_widget_muted"
+            android:fontFamily="@font/bricolage_regular"
+            android:textSize="12sp" />
+    </LinearLayout>
+</LinearLayout>
