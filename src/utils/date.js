@@ -41,6 +41,35 @@ export function relativeLabel(isoDate) {
   return `em ${days} dias`;
 }
 
+export function shortDay(isoDate) {
+  const d = new Date(isoDate);
+  return `${WEEKDAYS[d.getDay()]} ${d.getDate()}`;
+}
+
+export function shortHour(isoDate) {
+  const d = new Date(isoDate);
+  const m = d.getMinutes();
+  return m === 0 ? `${d.getHours()}h` : `${d.getHours()}h${pad(m)}`;
+}
+
+export function dueWord(isoDate) {
+  if (isOverdue(isoDate)) return 'atrasada';
+  const days = daysUntil(isoDate);
+  if (days === 0) return 'hoje';
+  if (days === 1) return 'amanhã';
+  return `em ${days} dias`;
+}
+
+export function nextLabel(isoDate) {
+  const days = daysUntil(isoDate);
+  const hour = `às ${shortHour(isoDate)}`;
+  if (days === 0) return `hoje ${hour}`;
+  if (days === 1) return `amanhã ${hour}`;
+  if (days < 7) return `${shortDay(isoDate)} ${hour}`;
+  const d = new Date(isoDate);
+  return `${pad(d.getDate())}/${pad(d.getMonth() + 1)} ${hour}`;
+}
+
 // ---- Repetição ----
 
 // A regra fica em uma coluna de texto (repeat_days), em três formatos:

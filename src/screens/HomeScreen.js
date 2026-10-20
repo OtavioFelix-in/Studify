@@ -1,31 +1,31 @@
-// Tela principal: lista de tarefas com busca e filtro por módulo/matéria.
-// Toque no card edita; toque no círculo conclui (com confete); longo apaga.
+// Tela principal: a folha de caderno com as tarefas, busca e filtro por módulo/matéria.
+// Toque na linha edita; toque no quadrado conclui (com confete); longo apaga.
 
 import { Lucide } from '@react-native-vector-icons/lucide';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
   Dimensions,
-  FlatList,
   Image,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import { clearAttachments, saveAttachments } from '../attachments/attachments';
 import SubjectsManager from '../components/SubjectsManager';
 import TaskForm from '../components/TaskForm';
-import TaskItem from '../components/TaskItem';
+import FolhaItem, { PAUTA } from '../components/FolhaItem';
 import * as db from '../db/database';
 import { cancelReminder, scheduleTaskReminder } from '../notifications/notifications';
 import { queueSync } from '../sync/sync';
 import { CONFETTI_COLORS, fonts, taskTypes } from '../theme';
 import { useTheme } from '../theme-context';
-import { nextRepeatDate } from '../utils/date';
+import { isOverdue, nextLabel, nextRepeatDate } from '../utils/date';
 
 const LOGO = {
   light: require('../../assets/logo-horizontal-claro.png'),
@@ -34,7 +34,10 @@ const LOGO = {
 
 export default function HomeScreen() {
   const { colors, isDark, mode, cycleMode } = useTheme();
-  const styles = useMemo(() => createStyles(colors), [colors]);
+  const { fontScale } = useWindowDimensions();
+  const pauta = PAUTA * fontScale;
+  const margem = Math.round(70 * Math.min(fontScale, 1.4));
+  const styles = useMemo(() => createStyles(colors, pauta, margem), [colors, pauta, margem]);
 
   const [tasks, setTasks] = useState([]);
   const [stepCounts, setStepCounts] = useState({});
@@ -46,6 +49,9 @@ export default function HomeScreen() {
   const [moduleFilter, setModuleFilter] = useState(null);
   const [subjectFilter, setSubjectFilter] = useState(null);
   const [celebrate, setCelebrate] = useState(0);
+  const [showDone, setShowDone] = useState(false);
+  const [folhaHeight, setFolhaHeight] = useState(0);
+  const [conteudoHeight, setConteudoHeight] = useState(0);
   const modules = useRef([]);
   const subjects = useRef([]);
 
@@ -186,7 +192,28 @@ export default function HomeScreen() {
     return true;
   });
 
-  const pendingCount = tasks.filter((t) => t.done === 0).length;
+  const pendentes = tasks.filter((t) => t.done === 0);
+  const atrasadas = pendentes.filter((t) => isOverdue(t.due_date));
+  const proxima = pendentes.find((t) => !isOverdue(t.due_date));
+  const listaPendentes = visibleTasks.filter((t) => t.done === 0);
+  const listaFeitas = visibleTasks.filter((t) => t.done === 1);
+  const totalLinhas = Math.ceil(Math.max(folhaHeight, conteudoHeight) / pauta) + 1;
+
+  function renderItem(item) {
+    return (
+      <FolhaItem
+        key={item.id}
+        task={item}
+        stepCount={stepCounts[item.uuid]}
+        photoCount={photoCounts[item.uuid]}
+        onToggle={handleToggle}
+        onDelete={handleDelete}
+        onEdit={openEdit}
+        pauta={pauta}
+        margem={margem}
+      />
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -198,11 +225,6 @@ export default function HomeScreen() {
             resizeMode="contain"
             accessibilityLabel="Studify"
           />
-          <Text style={styles.subtitle}>
-            {pendingCount === 0
-              ? 'Tudo em dia.'
-              : `${pendingCount} ${pendingCount === 1 ? 'tarefa pendente' : 'tarefas pendentes'}`}
-          </Text>
         </View>
         <Pressable style={styles.headerButton} onPress={() => setManagerVisible(true)}>
           <Lucide name="library" size={20} color={colors.text} />
@@ -214,6 +236,20 @@ export default function HomeScreen() {
             color={colors.text}
           />
         </Pressable>
+      </View>
+
+      <View style={styles.achado}>
+        {pendentes.length === 0 ? <Text style={styles.achadoText}>Tudo em dia.</Text> : null}
+        {atrasadas.length > 0 ? (
+          <Text style={[styles.achadoText, styles.achadoAlerta]}>
+            {atrasadas.length} {atrasadas.length === 1 ? 'tarefa atrasada' : 'tarefas atrasadas'}
+          </Text>
+        ) : null}
+        {proxima ? (
+          <Text style={styles.achadoText}>
+            Próxima: <Text style={styles.achadoTarefa}>{proxima.title}</Text>, {nextLabel(proxima.due_date)}
+          </Text>
+        ) : null}
       </View>
 
       <View style={styles.search}>
@@ -286,36 +322,57 @@ export default function HomeScreen() {
         </ScrollView>
       ) : null}
 
-      <FlatList
-        data={visibleTasks}
-        keyExtractor={(item) => String(item.id)}
-        renderItem={({ item }) => (
-          <TaskItem
-            task={item}
-            stepCount={stepCounts[item.uuid]}
-            photoCount={photoCounts[item.uuid]}
-            onToggle={handleToggle}
-            onDelete={handleDelete}
-            onEdit={openEdit}
-          />
-        )}
-        contentContainerStyle={styles.list}
-        ListEmptyComponent={
-          <View style={styles.empty}>
-            <Lucide name="notebook-pen" size={44} color={colors.textMuted} />
-            <Text style={styles.emptyText}>
-              {tasks.length === 0 ? 'Nenhuma tarefa ainda.' : 'Nada por aqui com esse filtro.'}
-            </Text>
-            <Text style={styles.emptyHint}>
-              {tasks.length === 0 ? 'Toque no + para adicionar a primeira.' : 'Tente limpar a busca ou o filtro.'}
-            </Text>
-          </View>
-        }
-      />
+      <View style={styles.folha} onLayout={(e) => setFolhaHeight(e.nativeEvent.layout.height)}>
+        <ScrollView contentContainerStyle={{ minHeight: folhaHeight }}>
+          <View
+            style={{ minHeight: folhaHeight }}
+            onLayout={(e) => setConteudoHeight(e.nativeEvent.layout.height)}
+          >
+            {Array.from({ length: totalLinhas }, (_, i) => (
+              <View key={i} style={[styles.linhaPauta, { top: i * pauta + pauta * 0.82 - 1 }]} />
+            ))}
+            <View style={styles.linhaMargem} />
 
-      <Pressable style={styles.fab} onPress={openNew}>
-        <Lucide name="plus" size={28} color={colors.onPrimary} />
-      </Pressable>
+            <View style={{ paddingTop: pauta, paddingBottom: pauta * 2 }}>
+              {visibleTasks.length === 0 ? (
+                <View style={[styles.linhaSolta, { marginBottom: pauta }]}>
+                  <Text style={styles.linhaSoltaText}>
+                    {tasks.length === 0 ? 'Nenhuma tarefa ainda.' : 'Nada por aqui com esse filtro.'}
+                  </Text>
+                </View>
+              ) : null}
+
+              {listaPendentes.map(renderItem)}
+
+              <Pressable
+                style={styles.linhaSolta}
+                onPress={openNew}
+                accessibilityRole="button"
+                accessibilityLabel="Nova tarefa"
+              >
+                <Text style={styles.linhaSoltaText}>
+                  <Text style={styles.mais}>+ </Text>escreva a próxima tarefa
+                </Text>
+              </Pressable>
+
+              {listaFeitas.length > 0 ? (
+                <Pressable
+                  style={[styles.linhaSolta, { marginTop: pauta, marginBottom: showDone ? pauta : 0 }]}
+                  onPress={() => setShowDone((v) => !v)}
+                  accessibilityRole="button"
+                  accessibilityState={{ expanded: showDone }}
+                >
+                  <Text style={[styles.linhaSoltaText, styles.feitasText]}>
+                    Feitas ({listaFeitas.length}) {showDone ? '⌄' : '›'}
+                  </Text>
+                </Pressable>
+              ) : null}
+
+              {showDone ? listaFeitas.map(renderItem) : null}
+            </View>
+          </View>
+        </ScrollView>
+      </View>
 
       <TaskForm
         visible={formVisible}
@@ -347,7 +404,7 @@ export default function HomeScreen() {
   );
 }
 
-function createStyles(colors) {
+function createStyles(colors, pauta, margem) {
   return StyleSheet.create({
     container: {
       flex: 1,
@@ -365,11 +422,23 @@ function createStyles(colors) {
       width: 145,
       height: 35,
     },
-    subtitle: {
+    achado: {
+      paddingHorizontal: 20,
+      paddingBottom: 10,
+    },
+    achadoText: {
       fontFamily: fonts.regular,
-      fontSize: 14,
-      color: colors.textMuted,
-      marginTop: 4,
+      fontSize: 16,
+      lineHeight: 22,
+      color: colors.text,
+    },
+    achadoAlerta: {
+      fontFamily: fonts.bold,
+      color: colors.danger,
+    },
+    achadoTarefa: {
+      fontFamily: fonts.semibold,
+      color: colors.primary,
     },
     headerButton: {
       width: 42,
@@ -433,42 +502,45 @@ function createStyles(colors) {
       color: '#FFFFFF',
       fontFamily: fonts.semibold,
     },
-    list: {
-      paddingBottom: 100,
+    folha: {
+      flex: 1,
+      backgroundColor: colors.card,
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
     },
-    empty: {
-      alignItems: 'center',
-      marginTop: 60,
-      paddingHorizontal: 40,
-    },
-    emptyText: {
-      fontSize: 17,
-      fontFamily: fonts.semibold,
-      color: colors.text,
-      marginTop: 12,
-    },
-    emptyHint: {
-      fontFamily: fonts.regular,
-      fontSize: 14,
-      color: colors.textMuted,
-      marginTop: 4,
-      textAlign: 'center',
-    },
-    fab: {
+    linhaPauta: {
       position: 'absolute',
-      right: 24,
-      bottom: 24,
-      width: 60,
-      height: 60,
-      borderRadius: 14,
-      backgroundColor: colors.primary,
-      alignItems: 'center',
-      justifyContent: 'center',
-      elevation: 6,
-      shadowColor: '#000',
-      shadowOpacity: 0.2,
-      shadowRadius: 8,
-      shadowOffset: { width: 0, height: 4 },
+      left: 0,
+      right: 0,
+      height: 1,
+      backgroundColor: colors.primaryLight,
+    },
+    linhaMargem: {
+      position: 'absolute',
+      top: 0,
+      bottom: 0,
+      left: margem,
+      width: 2,
+      backgroundColor: colors.danger,
+      opacity: 0.5,
+    },
+    linhaSolta: {
+      paddingLeft: margem + 12,
+      paddingRight: 16,
+    },
+    linhaSoltaText: {
+      fontFamily: fonts.regular,
+      fontSize: 16,
+      lineHeight: PAUTA,
+      color: colors.textMuted,
+    },
+    mais: {
+      fontFamily: fonts.bold,
+      color: colors.primary,
+    },
+    feitasText: {
+      fontFamily: fonts.semibold,
+      fontSize: 15,
     },
   });
 }
